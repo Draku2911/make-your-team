@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Make Your Team</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --dark:#0D1B3E;--orange:#FF6B2B;
+  --green:#00C464;--gdim:rgba(0,196,100,.15);--gborder:rgba(0,196,100,.35);
+  --red:#E8203A;--rdim:rgba(232,32,58,.15);--rborder:rgba(232,32,58,.35);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.screen{display:none;width:100%;max-width:430px;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+#home{background:linear-gradient(160deg,#1A3A6B,#0D1F40);align-items:center;justify-content:center;padding:32px 24px;text-align:center;gap:20px}
+.ball{font-size:72px;animation:bounce 2s infinite ease-in-out}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.logo{font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1;text-transform:uppercase}
+.logo span{color:var(--orange)}
+.tagline{font-size:13px;opacity:.6;letter-spacing:3px;text-transform:uppercase}
+.rules-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:20px;padding:20px;text-align:left;width:100%}
+.rules-card h3{font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:.5;margin-bottom:12px}
+.rule{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px;font-size:14px;line-height:1.4;opacity:.9}
+.btn-start{background:var(--orange);color:#fff;border:none;border-radius:18px;padding:20px 48px;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:2px;cursor:pointer;width:100%;box-shadow:0 8px 24px rgba(255,107,43,.4);transition:transform .1s}
+.btn-start:active{transform:scale(.97)}
+#auction{background:var(--dark);justify-content:space-between}
+.turn-banner{padding:16px 20px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;text-align:center}
+.turn-banner.green{background:var(--green)}
+.turn-banner.red{background:var(--red)}
+.player-card{margin:12px 16px;background:linear-gradient(135deg,#1e2f5e,#2a4080);border-radius:24px;padding:18px;text-align:center;border:1px solid rgba(255,255,255,.1)}
+.player-pos{display:inline-block;background:var(--orange);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 14px;border-radius:20px;margin-bottom:10px}
+.player-name{font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:4px}
+.player-club{font-size:13px;opacity:.45;margin-bottom:14px}
+.bid-display{background:rgba(0,0,0,.3);border-radius:14px;padding:12px}
+.bid-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;opacity:.45}
+.bid-amount{font-size:34px;font-weight:900;color:var(--orange)}
+.bid-unit{font-size:13px;opacity:.5}
+.teams-row{display:flex;gap:10px;margin:0 16px}
+.team-panel{flex:1;border-radius:16px;padding:10px}
+.team-panel.green{background:var(--gdim);border:1px solid var(--gborder)}
+.team-panel.red{background:var(--rdim);border:1px solid var(--rborder)}
+.team-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.team-name{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.team-name.green{color:var(--green)}.team-name.red{color:var(--red)}
+.team-budget{font-size:11px;opacity:.55}
+.slot{font-size:11px;padding:4px 8px;border-radius:8px;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.slot.empty{background:rgba(255,255,255,.04);opacity:.4}
+.slot.filled.green{background:rgba(0,196,100,.2)}
+.slot.filled.red{background:rgba(232,32,58,.2)}
+.slot-pos{font-size:9px;font-weight:700;opacity:.6;min-width:22px}
+.slot-player{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.action-area{padding:12px 16px 20px;display:flex;flex-direction:column;gap:8px}
+.player-count{text-align:center;font-size:11px;opacity:.4}
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-bet{padding:16px 8px;border:none;border-radius:14px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:transform .1s,opacity .15s}
+.btn-bet:active:not(:disabled){transform:scale(.95)}
+.btn-bet.green{background:var(--green);color:#fff}
+.btn-bet.red{background:var(--red);color:#fff}
+.btn-bet:disabled{opacity:.2;cursor:default}
+.btn-let{padding:14px 8px;border-radius:14px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:transform .1s,opacity .15s;border:2px solid;background:transparent}
+.btn-let:active:not(:disabled){transform:scale(.95)}
+.btn-let.green{border-color:var(--green);color:var(--green)}
+.btn-let.red{border-color:var(--red);color:var(--red)}
+.btn-let:disabled{opacity:.2;cursor:default}
+#result{background:linear-gradient(160deg,#1A3A6B,#0D1F40);padding:24px 16px;gap:14px;overflow-y:auto}
+.result-title{text-align:center;font-size:24px;font-weight:900;text-transform:uppercase;letter-spacing:-1px}
+.result-title span{color:var(--orange)}
+.result-teams{display:flex;gap:10px}
+.result-team{flex:1;border-radius:18px;padding:14px}
+.result-team.green{background:var(--gdim);border:1px solid var(--gborder)}
+.result-team.red{background:var(--rdim);border:1px solid var(--rborder)}
+.result-team-name{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;text-align:center}
+.result-team-name.green{color:var(--green)}.result-team-name.red{color:var(--red)}
+.result-player{background:rgba(255,255,255,.07);border-radius:10px;padding:7px 9px;margin-bottom:5px}
+.result-player-pos{font-size:9px;font-weight:700;opacity:.5;text-transform:uppercase;letter-spacing:1px}
+.result-player-name{font-size:12px;font-weight:700}
+.result-player-price{font-size:11px;opacity:.45}
+.result-budget{text-align:center;margin-top:8px;font-size:11px;opacity:.55}
+.btn-row-result{display:flex;gap:10px;margin-top:4px}
+.btn-again{flex:1;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
+.btn-home-end{flex:1;background:transparent;color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:14px;padding:16px;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
+#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div id="home" class="screen active">
+  <div class="ball">&#x26BD;</div>
+  <div>
+    <div class="logo">Make Your<br><span>Team</span></div>
+    <div class="tagline" style="margin-top:8px">2 players &middot; 1 phone</div>
+  </div>
+  <div class="rules-card">
+    <h3>How to play</h3>
+    <div class="rule">&#x1F4B0; Each player starts with <strong>500M</strong></div>
+    <div class="rule">&#x1F3AF; Build: <strong>1 GK &middot; 1 DEF &middot; 2 MID &middot; 1 ATT</strong></div>
+    <div class="rule">&#x1F528; Active player: <strong>BET</strong> (+10M) to raise, or <strong>LET</strong> to give to opponent</div>
+    <div class="rule">&#x1F501; After a BET, opponent must respond</div>
+    <div class="rule">&#x1F3C6; Best squad wins the debate!</div>
+  </div>
+  <button class="btn-start" onclick="startGame()">Kick Off &#x26BD;</button>
+</div>
+
+<div id="auction" class="screen">
+  <div class="turn-banner green" id="turnBanner">GREEN - Your turn</div>
+  <div class="player-card">
+    <div class="player-pos" id="playerPos">GK</div>
+    <div class="player-name" id="playerName">-</div>
+    <div class="player-club" id="playerClub">-</div>
+    <div class="bid-display">
+      <div class="bid-label">Current Bid</div>
+      <div class="bid-amount" id="bidAmount">0</div>
+      <div class="bid-unit">Million &euro;</div>
+    </div>
+  </div>
+  <div class="teams-row">
+    <div class="team-panel green">
+      <div class="team-header">
+        <div class="team-name green">GREEN</div>
+        <div class="team-budget" id="greenBudget">500M</div>
+      </div>
+      <div id="greenSlots"></div>
+    </div>
+    <div class="team-panel red">
+      <div class="team-header">
+        <div class="team-name red">RED</div>
+        <div class="team-budget" id="redBudget">500M</div>
+      </div>
+      <div id="redSlots"></div>
+    </div>
+  </div>
+  <div class="action-area">
+    <div class="player-count" id="playerCount">Player 1 of 10</div>
+    <div class="btn-grid">
+      <button class="btn-bet green" id="gBet" onclick="doBet('green')">GREEN BET +10M</button>
+      <button class="btn-bet red"   id="rBet" onclick="doBet('red')">RED BET +10M</button>
+      <button class="btn-let green" id="gLet" onclick="doLet('green')">GREEN LET</button>
+      <button class="btn-let red"   id="rLet" onclick="doLet('red')">RED LET</button>
+    </div>
+  </div>
+</div>
+
+<div id="result" class="screen">
+  <div class="result-title">Final <span>Squads</span></div>
+  <div class="result-teams">
+    <div class="result-team green">
+      <div class="result-team-name green">GREEN</div>
+      <div id="greenFinal"></div>
+      <div class="result-budget" id="greenFinalBudget"></div>
+    </div>
+    <div class="result-team red">
+      <div class="result-team-name red">RED</div>
+      <div id="redFinal"></div>
+      <div class="result-budget" id="redFinalBudget"></div>
+    </div>
+  </div>
+  <div class="btn-row-result">
+    <button class="btn-again"    onclick="startGame()">Play Again</button>
+    <button class="btn-home-end" onclick="goHome()">Home</button>
+  </div>
+</div>
+
+<script>
+var PLAYERS = [
+  {name:"Courtois",club:"Real Madrid",pos:"GK"},
+  {name:"Alisson",club:"Liverpool",pos:"GK"},
+  {name:"Ederson",club:"Man City",pos:"GK"},
+  {name:"Neuer",club:"Bayern Munich",pos:"GK"},
+  {name:"Ter Stegen",club:"Barcelona",pos:"GK"},
+  {name:"Donnarumma",club:"PSG",pos:"GK"},
+  {name:"Maignan",club:"AC Milan",pos:"GK"},
+  {name:"Onana",club:"Man United",pos:"GK"},
+  {name:"David Raya",club:"Arsenal",pos:"GK"},
+  {name:"Diogo Costa",club:"Porto",pos:"GK"},
+  {name:"Kobel",club:"Dortmund",pos:"GK"},
+  {name:"Sommer",club:"Inter Milan",pos:"GK"},
+  {name:"Van Dijk",club:"Liverpool",pos:"DEF"},
+  {name:"Ruben Dias",club:"Man City",pos:"DEF"},
+  {name:"Marquinhos",club:"PSG",pos:"DEF"},
+  {name:"Rudiger",club:"Real Madrid",pos:"DEF"},
+  {name:"Kounde",club:"Barcelona",pos:"DEF"},
+  {name:"Theo Hernandez",club:"AC Milan",pos:"DEF"},
+  {name:"Hakimi",club:"PSG",pos:"DEF"},
+  {name:"Trent A-Arnold",club:"Liverpool",pos:"DEF"},
+  {name:"Saliba",club:"Arsenal",pos:"DEF"},
+  {name:"Bastoni",club:"Inter Milan",pos:"DEF"},
+  {name:"Alphonso Davies",club:"Bayern Munich",pos:"DEF"},
+  {name:"Militao",club:"Real Madrid",pos:"DEF"},
+  {name:"Pavard",club:"Inter Milan",pos:"DEF"},
+  {name:"Cubarsi",club:"Barcelona",pos:"DEF"},
+  {name:"Konate",club:"Liverpool",pos:"DEF"},
+  {name:"Robertson",club:"Liverpool",pos:"DEF"},
+  {name:"Upamecano",club:"Bayern Munich",pos:"DEF"},
+  {name:"Araujo",club:"Barcelona",pos:"DEF"},
+  {name:"Modric",club:"Real Madrid",pos:"MID"},
+  {name:"De Bruyne",club:"Man City",pos:"MID"},
+  {name:"Pedri",club:"Barcelona",pos:"MID"},
+  {name:"Rodri",club:"Man City",pos:"MID"},
+  {name:"Bellingham",club:"Real Madrid",pos:"MID"},
+  {name:"Kroos",club:"Real Madrid",pos:"MID"},
+  {name:"Gavi",club:"Barcelona",pos:"MID"},
+  {name:"Declan Rice",club:"Arsenal",pos:"MID"},
+  {name:"Odegaard",club:"Arsenal",pos:"MID"},
+  {name:"Foden",club:"Man City",pos:"MID"},
+  {name:"Musiala",club:"Bayern Munich",pos:"MID"},
+  {name:"Wirtz",club:"Bayer Leverkusen",pos:"MID"},
+  {name:"Bruno Fernandes",club:"Man United",pos:"MID"},
+  {name:"Bernardo Silva",club:"Man City",pos:"MID"},
+  {name:"Barella",club:"Inter Milan",pos:"MID"},
+  {name:"Calhanoglu",club:"Inter Milan",pos:"MID"},
+  {name:"Camavinga",club:"Real Madrid",pos:"MID"},
+  {name:"Tchouameni",club:"Real Madrid",pos:"MID"},
+  {name:"Vitinha",club:"PSG",pos:"MID"},
+  {name:"Enzo Fernandez",club:"Chelsea",pos:"MID"},
+  {name:"Frenkie de Jong",club:"Barcelona",pos:"MID"},
+  {name:"Gundogan",club:"Barcelona",pos:"MID"},
+  {name:"Kimmich",club:"Bayern Munich",pos:"MID"},
+  {name:"Fabian Ruiz",club:"PSG",pos:"MID"},
+  {name:"Haaland",club:"Man City",pos:"ATT"},
+  {name:"Mbappe",club:"Real Madrid",pos:"ATT"},
+  {name:"Vinicius Jr",club:"Real Madrid",pos:"ATT"},
+  {name:"Harry Kane",club:"Bayern Munich",pos:"ATT"},
+  {name:"Messi",club:"Inter Miami",pos:"ATT"},
+  {name:"Ronaldo",club:"Al-Nassr",pos:"ATT"},
+  {name:"Salah",club:"Liverpool",pos:"ATT"},
+  {name:"Lewandowski",club:"Barcelona",pos:"ATT"},
+  {name:"Lautaro",club:"Inter Milan",pos:"ATT"},
+  {name:"Bukayo Saka",club:"Arsenal",pos:"ATT"},
+  {name:"Rodrygo",club:"Real Madrid",pos:"ATT"},
+  {name:"Griezmann",club:"Atletico Madrid",pos:"ATT"},
+  {name:"Dembele",club:"PSG",pos:"ATT"},
+  {name:"Osimhen",club:"Galatasaray",pos:"ATT"},
+  {name:"Vlahovic",club:"Juventus",pos:"ATT"},
+  {name:"Neymar",club:"Al-Hilal",pos:"ATT"}
+];
+
+// Needs per team per position
+var NEED = {GK:1,DEF:1,MID:2,ATT:1};
+
+var G = {};
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+function opp(c){return c==='green'?'red':'green';}
+
+// How many of this pos does a team still need?
+function posNeeded(team,pos){
+  var has=team.filter(function(p){return p.pos===pos;}).length;
+  return Math.max(0,NEED[pos]-has);
+}
+
+// Total slots still needed by a team
+function slotsLeft(team){return 5-team.length;}
+
+function isFull(team){return team.length>=5;}
+
+// Pick the next player to auction:
+// Must be a position that AT LEAST ONE team still needs.
+// We pick from the remaining pool randomly among valid positions.
+function pickNextPlayer(){
+  var g=G.green.players, r=G.red.players;
+  // Find positions still needed by at least one team
+  var validPos=[];
+  ['GK','DEF','MID','ATT'].forEach(function(pos){
+    if(posNeeded(g,pos)>0||posNeeded(r,pos)>0) validPos.push(pos);
+  });
+  if(validPos.length===0) return null;
+  // Filter pool to valid positions
+  var pool=G.pool.filter(function(p){return validPos.indexOf(p.pos)!==-1;});
+  if(pool.length===0) return null;
+  // Pick random from pool
+  var idx=Math.floor(Math.random()*pool.length);
+  var player=pool[idx];
+  // Remove from pool
+  G.pool=G.pool.filter(function(p){return p!==player;});
+  return player;
+}
+
+function startGame(){
+  G={
+    pool: shuffle(PLAYERS.slice()),
+    current: null,
+    green:{budget:500,players:[]},
+    red:{budget:500,players:[]},
+    bid:0,
+    whosTurn:'green',
+    firstBidder:'green',
+    playerNum:0,
+    totalPlayers:10
+  };
+  G.current=pickNextPlayer();
+  G.playerNum=1;
+  showScreen('auction');
+  renderAuction();
+}
+
+function goHome(){showScreen('home');}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+function renderAuction(){
+  var p=G.current;
+  if(!p){showResult();return;}
+  document.getElementById('playerPos').textContent=p.pos;
+  document.getElementById('playerName').textContent=p.name;
+  document.getElementById('playerClub').textContent=p.club;
+  document.getElementById('bidAmount').textContent=G.bid;
+  document.getElementById('playerCount').textContent='Player '+G.playerNum+' of '+G.totalPlayers;
+  document.getElementById('greenBudget').textContent=G.green.budget+'M';
+  document.getElementById('redBudget').textContent=G.red.budget+'M';
+  renderSlots('green');renderSlots('red');
+
+  var banner=document.getElementById('turnBanner');
+  banner.className='turn-banner '+G.whosTurn;
+  banner.textContent=(G.whosTurn==='green'?'GREEN':'RED')+' - Your turn';
+
+  updateButtons(p);
+}
+
+function renderSlots(color){
+  var team=G[color].players;
+  var filled={GK:[],DEF:[],MID:[],ATT:[]};
+  team.forEach(function(p){filled[p.pos].push(p);});
+  var html='';
+  ['GK','DEF','MID','ATT'].forEach(function(pos){
+    for(var i=0;i<NEED[pos];i++){
+      var p=filled[pos][i];
+      if(p){
+        html+='<div class="slot filled '+color+'"><span class="slot-pos">'+pos+'</span><span class="slot-player">'+p.name+'</span></div>';
+      } else {
+        html+='<div class="slot empty"><span class="slot-pos">'+pos+'</span><span class="slot-player">-</span></div>';
+      }
+    }
+  });
+  document.getElementById(color+'Slots').innerHTML=html;
+}
+
+function updateButtons(p){
+  var gBet=document.getElementById('gBet');
+  var rBet=document.getElementById('rBet');
+  var gLet=document.getElementById('gLet');
+  var rLet=document.getElementById('rLet');
+
+  var gActive=(G.whosTurn==='green');
+  var rActive=(G.whosTurn==='red');
+
+  // Can a team receive this player?
+  var gCanTake=posNeeded(G.green.players,p.pos)>0&&!isFull(G.green.players);
+  var rCanTake=posNeeded(G.red.players,p.pos)>0&&!isFull(G.red.players);
+
+  // BET: active, can take, can afford next bid
+  gBet.disabled=!gActive||!gCanTake||G.green.budget<(G.bid+10);
+  rBet.disabled=!rActive||!rCanTake||G.red.budget<(G.bid+10);
+
+  // LET: active only. 
+  // If active player can't take this pos -> they MUST let (auto-handled) but button still shown
+  gLet.disabled=!gActive;
+  rLet.disabled=!rActive;
+}
+
+function doBet(color){
+  if(G.whosTurn!==color) return;
+  var p=G.current;
+  if(posNeeded(G[color].players,p.pos)===0||isFull(G[color].players)){
+    toast('You cannot take this position!');return;
+  }
+  var nextBid=G.bid+10;
+  if(G[color].budget<nextBid){toast('Not enough budget!');return;}
+  G.bid=nextBid;
+  G.whosTurn=opp(color);
+  renderAuction();
+}
+
+function doLet(color){
+  if(G.whosTurn!==color) return;
+  var p=G.current;
+  var opponent=opp(color);
+
+  // Give to opponent if they can take it, else give to active player (forced)
+  if(posNeeded(G[opponent].players,p.pos)>0&&!isFull(G[opponent].players)){
+    assignPlayer(opponent,G.bid);
+  } else {
+    // Opponent can't take it either - active player must take it
+    if(posNeeded(G[color].players,p.pos)>0&&!isFull(G[color].players)){
+      assignPlayer(color,G.bid);
+    } else {
+      // Nobody needs it — skip
+      nextRound();
+    }
+  }
+}
+
+function assignPlayer(winner,price){
+  var p=G.current;
+  G[winner].players.push({name:p.name,club:p.club,pos:p.pos,price:price});
+  G[winner].budget=Math.max(0,G[winner].budget-price);
+  toast((winner==='green'?'GREEN':'RED')+' gets '+p.name+(price>0?' for '+price+'M':' free')+'!');
+  nextRound();
+}
+
+function nextRound(){
+  // Check if both full
+  if(isFull(G.green.players)&&isFull(G.red.players)){showResult();return;}
+
+  // Pick next valid player
+  var next=pickNextPlayer();
+  if(!next){
+    // No more valid players — auto-fill remaining if possible
+    autoFill();
+    showResult();
+    return;
+  }
+  G.current=next;
+  G.bid=0;
+  G.firstBidder=opp(G.firstBidder);
+  G.whosTurn=G.firstBidder;
+  G.playerNum++;
+
+  // If the first bidder can't take this pos, switch turn to opponent
+  checkAutoSkip();
+  renderAuction();
+}
+
+// If whosTurn player can't take current player's pos AND can't bet, skip to opponent
+function checkAutoSkip(){
+  var p=G.current;
+  var active=G.whosTurn;
+  var opponent=opp(active);
+  var activeCantTake=posNeeded(G[active].players,p.pos)===0||isFull(G[active].players);
+  var oppCantTake=posNeeded(G[opponent].players,p.pos)===0||isFull(G[opponent].players);
+
+  if(activeCantTake&&oppCantTake){
+    // Nobody needs this player — skip it
+    var next=pickNextPlayer();
+    if(!next){autoFill();showResult();return;}
+    G.current=next;
+    checkAutoSkip();
+    return;
+  }
+
+  if(activeCantTake){
+    // Active can't take it — they must let immediately, give to opponent
+    // But we show it first so they see who gets it
+    // Actually just auto-assign to opponent
+    toast(p.name+' goes to '+(opponent==='green'?'GREEN':'RED')+' (only one team needs this pos)');
+    setTimeout(function(){assignPlayer(opponent,0);},1200);
+  }
+}
+
+function autoFill(){
+  // Give remaining needed players for free
+  ['GK','DEF','MID','ATT'].forEach(function(pos){
+    var gNeed=posNeeded(G.green.players,pos);
+    var rNeed=posNeeded(G.red.players,pos);
+    if(gNeed===0&&rNeed===0) return;
+    var pool=G.pool.filter(function(p){return p.pos===pos;});
+    var pi=0;
+    while(gNeed>0&&pi<pool.length){G.green.players.push({name:pool[pi].name,club:pool[pi].club,pos:pos,price:0});gNeed--;pi++;}
+    while(rNeed>0&&pi<pool.length){G.red.players.push({name:pool[pi].name,club:pool[pi].club,pos:pos,price:0});rNeed--;pi++;}
+  });
+}
+
+function showResult(){
+  var posOrder=['GK','DEF','MID','ATT'];
+  ['green','red'].forEach(function(color){
+    var sorted=G[color].players.slice().sort(function(a,b){return posOrder.indexOf(a.pos)-posOrder.indexOf(b.pos);});
+    document.getElementById(color+'Final').innerHTML=sorted.map(function(p){
+      return '<div class="result-player"><div class="result-player-pos">'+p.pos+'</div><div class="result-player-name">'+p.name+'</div><div class="result-player-price">'+(p.price>0?p.price+'M':'Free')+'</div></div>';
+    }).join('');
+    document.getElementById(color+'FinalBudget').textContent=G[color].budget+'M remaining';
+  });
+  showScreen('result');
+}
+</script>
+</body>
+</html>
